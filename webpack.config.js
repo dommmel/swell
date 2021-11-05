@@ -9,6 +9,18 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           'raw-loader',
+          {
+            loader: 'simplify-loader',
+            options: {
+              comment: true,
+              whitespace: true,
+              crlf: false,
+              ignore: [
+                // three.js glsl macro
+                '#include <'
+              ]
+            }
+          },
           'glslify-loader'
         ]
       }
