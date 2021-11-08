@@ -15,25 +15,13 @@ gl.clearColor(0, 0, 0, 1);
 /////////////////////
 // SET UP PROGRAM
 /////////////////////
-
+import { createShader } from './webglHelper';
 import fsSource from './fragmentShaderSource.glsl';
 import vsSource from './vertexShaderSource.glsl';
 
-var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-gl.shaderSource(vertexShader, vsSource);
-gl.compileShader(vertexShader);
+let vertexShader = createShader(gl,gl.VERTEX_SHADER,vsSource)
+let fragmentShader = createShader(gl,gl.FRAGMENT_SHADER,fsSource)
 
-if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-    console.error(gl.getShaderInfoLog(vertexShader));
-}
-
-var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-gl.shaderSource(fragmentShader, fsSource);
-gl.compileShader(fragmentShader);
-
-if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-    console.error(gl.getShaderInfoLog(fragmentShader));
-}
 
 var program = gl.createProgram();
 gl.attachShader(program, vertexShader);
