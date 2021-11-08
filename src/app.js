@@ -31,22 +31,25 @@ gl.useProgram(program);
 let triangleArray = gl.createVertexArray();
 gl.bindVertexArray(triangleArray);
 
-let positions = new Float32Array([
+let positionArray = new Float32Array([
     -0.5, -0.5, 0.0,
     0.5, -0.5, 0.0,
     0.0, 0.5, 0.0
 ]);
-createVertexArrayAttributes(gl, 0, positions, gl.FLOAT)
+createVertexArrayAttributes(gl, program, "position", positionArray, gl.FLOAT)
 
-let colors = new Float32Array([
+let colorArray = new Float32Array([
     1.0, 0.0, 0.0,
     0.0, 1.0, 0.0,
     0.0, 0.0, 1.0
 ]);
-createVertexArrayAttributes(gl, 1, colors, gl.FLOAT)
+createVertexArrayAttributes(gl, program, "color", colorArray, gl.FLOAT)
 
 ////////////////
 // DRAW
 ////////////////
 gl.clear(gl.COLOR_BUFFER_BIT);
-gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+var offset = 0;
+var count = 3;
+gl.drawArrays(gl.TRIANGLES, offset, count);

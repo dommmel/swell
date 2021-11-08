@@ -25,10 +25,11 @@ export function createProgram(gl, vertexShader, fragmentShader) {
     gl.deleteProgram(program);
 }
 
-export function createVertexArrayAttributes(gl, index, attributeArray, type, drawType = gl.STATIC_DRAW) {
+export function createVertexArrayAttributes(gl, program, name, attributeArray, type, drawType = gl.STATIC_DRAW) {
     let buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, attributeArray, drawType);
-    gl.vertexAttribPointer(index, 3, type, false, 0, 0);
-    gl.enableVertexAttribArray(index);
+    let location = gl.getAttribLocation(program, name); 
+    gl.vertexAttribPointer(location, 3, type, false, 0, 0);
+    gl.enableVertexAttribArray(location);
 }

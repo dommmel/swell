@@ -1,6 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = (env, options) => {
-  console.log("dev",options.mode);
   return  {
     ...(options.mode == "development") && { devtool:  "eval-source-map" },
     entry: "./src/app.js",
