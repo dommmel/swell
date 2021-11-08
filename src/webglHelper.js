@@ -17,6 +17,7 @@ export function createProgram(gl, vertexShader, fragmentShader) {
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
     var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+    gl.program = program;
     if (success) {
         return program;
     }
@@ -25,11 +26,11 @@ export function createProgram(gl, vertexShader, fragmentShader) {
     gl.deleteProgram(program);
 }
 
-export function createVertexArrayAttributes(gl, program, name, attributeArray, type, drawType = gl.STATIC_DRAW) {
+export function createVertexArrayAttributes(gl, name, attributeArray, type, drawType = gl.STATIC_DRAW) {
     let buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, attributeArray, drawType);
-    let location = gl.getAttribLocation(program, name); 
+    let location = gl.getAttribLocation(gl.program, name);
     gl.vertexAttribPointer(location, 3, type, false, 0, 0);
     gl.enableVertexAttribArray(location);
 }

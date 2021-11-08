@@ -34,6 +34,12 @@ module.exports = (env, options) => {
     ],
     devServer: { 
       hot: false,
+      open: {
+        app: {
+          name: 'google chrome',
+          arguments: [ '--auto-open-devtools-for-tabs'],
+        },
+      },
     }
   }
 }

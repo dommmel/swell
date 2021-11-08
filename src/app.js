@@ -1,8 +1,8 @@
 //Create canvas
 
 var canvas = document.querySelector("canvas");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = 500;
+canvas.height = 500;
 
 var gl = canvas.getContext("webgl2", {alpha: false});
 if (!gl) {
@@ -36,14 +36,17 @@ let positionArray = new Float32Array([
     0.5, -0.5, 0.0,
     0.0, 0.5, 0.0
 ]);
-createVertexArrayAttributes(gl, program, "position", positionArray, gl.FLOAT)
+createVertexArrayAttributes(gl, "a_position", positionArray, gl.FLOAT)
 
 let colorArray = new Float32Array([
     1.0, 0.0, 0.0,
     0.0, 1.0, 0.0,
     0.0, 0.0, 1.0
 ]);
-createVertexArrayAttributes(gl, program, "color", colorArray, gl.FLOAT)
+createVertexArrayAttributes(gl, "a_color", colorArray, gl.FLOAT)
+
+var u_translation = gl.getUniformLocation(gl.program, 'u_translation');
+gl.uniform4f(u_translation, 0.5, 0.5, 0, 0.0);
 
 ////////////////
 // DRAW
