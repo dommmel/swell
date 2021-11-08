@@ -15,29 +15,19 @@ gl.clearColor(0, 0, 0, 1);
 /////////////////////
 // SET UP PROGRAM
 /////////////////////
-import { createShader } from './webglHelper';
+import { createShader, createProgram } from './webglHelper';
 import fsSource from './fragmentShaderSource.glsl';
 import vsSource from './vertexShaderSource.glsl';
 
 let vertexShader = createShader(gl,gl.VERTEX_SHADER,vsSource)
 let fragmentShader = createShader(gl,gl.FRAGMENT_SHADER,fsSource)
 
-
-var program = gl.createProgram();
-gl.attachShader(program, vertexShader);
-gl.attachShader(program, fragmentShader);
-gl.linkProgram(program);
-
-if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    console.error(gl.getProgramInfoLog(program));
-}
-
+let program = createProgram(gl, vertexShader, fragmentShader)
 gl.useProgram(program);
 
 /////////////////////
 // SET UP GEOMETRY
 /////////////////////
-
 var triangleArray = gl.createVertexArray();
 gl.bindVertexArray(triangleArray);
 
