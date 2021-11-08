@@ -15,7 +15,7 @@ gl.clearColor(0, 0, 0, 1);
 /////////////////////
 // SET UP PROGRAM
 /////////////////////
-import { createShader, createProgram } from './webglHelper';
+import { createShader, createProgram, createVertexArrayAttributes } from './webglHelper';
 import fsSource from './fragmentShaderSource.glsl';
 import vsSource from './vertexShaderSource.glsl';
 
@@ -28,32 +28,22 @@ gl.useProgram(program);
 /////////////////////
 // SET UP GEOMETRY
 /////////////////////
-var triangleArray = gl.createVertexArray();
+let triangleArray = gl.createVertexArray();
 gl.bindVertexArray(triangleArray);
 
-var positions = new Float32Array([
+let positions = new Float32Array([
     -0.5, -0.5, 0.0,
     0.5, -0.5, 0.0,
     0.0, 0.5, 0.0
 ]);
+createVertexArrayAttributes(gl, 0, positions, gl.FLOAT)
 
-var positionBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-gl.enableVertexAttribArray(0);
-
-var colors = new Float32Array([
+let colors = new Float32Array([
     1.0, 0.0, 0.0,
     0.0, 1.0, 0.0,
     0.0, 0.0, 1.0
 ]);
-
-var colorBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
-gl.enableVertexAttribArray(1);
+createVertexArrayAttributes(gl, 1, colors, gl.FLOAT)
 
 ////////////////
 // DRAW
