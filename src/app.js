@@ -45,8 +45,20 @@ let colorArray = new Float32Array([
 ]);
 createVertexArrayAttributes(gl, "a_color", colorArray, gl.FLOAT)
 
+
 var u_translation = gl.getUniformLocation(gl.program, 'u_translation');
 gl.uniform4f(u_translation, 0.5, 0.5, 0, 0.0);
+
+var ANGLE = 90.0;
+var radian = Math.PI * ANGLE / 180.0; // Convert to radians
+var cosB = Math.cos(radian);
+var sinB = Math.sin(radian);
+
+var u_cosB = gl.getUniformLocation(gl.program, 'u_cosB');
+var u_sinB = gl.getUniformLocation(gl.program, 'u_sinB');
+gl.uniform1f(u_cosB, cosB);
+gl.uniform1f(u_sinB, sinB);
+
 
 ////////////////
 // DRAW
