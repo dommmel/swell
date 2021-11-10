@@ -1,3 +1,5 @@
+import { createShader, createProgram, createPlaneVertices, createBuffersFromVertices } from './webglHelper';
+
 //Create canvas
 
 var canvas = document.querySelector("canvas");
@@ -15,7 +17,6 @@ gl.clearColor(0, 0, 0, 1);
 /////////////////////
 // SET UP PROGRAM
 /////////////////////
-import { createShader, createProgram, createVertexArrayAttributes } from './webglHelper';
 import fsSource from './fragmentShaderSource.glsl';
 import vsSource from './vertexShaderSource.glsl';
 
@@ -28,43 +29,37 @@ gl.useProgram(program);
 /////////////////////
 // SET UP GEOMETRY
 /////////////////////
-let triangleArray = gl.createVertexArray();
-gl.bindVertexArray(triangleArray);
+let numIndices = 0;
 
-let positionArray = new Float32Array([
-    -0.5, -0.5, 0.0,
-    0.5, -0.5, 0.0,
-    0.0, 0.5, 0.0
-]);
-createVertexArrayAttributes(gl, "a_position", positionArray, gl.FLOAT)
+{
+    const attributeName = 'a_position';
+    var numComponents = 3;  // (x, y, z)
+    var type = gl.FLOAT;    // 32bit floating point values
+    var normalize = false;  // leave the values as they are
+    var offset = 0;         // start at the beginning of the buffer
+    var stride = 0;         // how many bytes to move to the next vertex
+                            // 0 = use the correct stride for type and numComponents
 
-let colorArray = new Float32Array([
-    1.0, 0.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 0.0, 1.0
-]);
-createVertexArrayAttributes(gl, "a_color", colorArray, gl.FLOAT)
+    const attribute = gl.getAttribLocation(program, attributeName);
+    const vertices = createPlaneVertices(40, 40);
+    numIndices =+ vertices.indices.length;
 
+    createBuffersFromVertices(gl, vertices);
 
-var u_translation = gl.getUniformLocation(gl.program, 'u_translation');
-gl.uniform4f(u_translation, 0.5, 0.5, 0, 0.0);
+    // turn on getting data out of a buffer for this attribute
+    gl.enableVertexAttribArray(attribute);
+    
+    gl.vertexAttribPointer(attribute, numComponents, type, normalize, stride, offset);
 
-var ANGLE = 90.0;
-var radian = Math.PI * ANGLE / 180.0; // Convert to radians
-var cosB = Math.cos(radian);
-var sinB = Math.sin(radian);
-
-var u_cosB = gl.getUniformLocation(gl.program, 'u_cosB');
-var u_sinB = gl.getUniformLocation(gl.program, 'u_sinB');
-gl.uniform1f(u_cosB, cosB);
-gl.uniform1f(u_sinB, sinB);
-
-
+}
 ////////////////
 // DRAW
 ////////////////
-gl.clear(gl.COLOR_BUFFER_BIT);
+// gl.clear(gl.COLOR_BUFFER_BIT);
 
-var offset = 0;
-var count = 3;
-gl.drawArrays(gl.TRIANGLES, offset, count);
+gl.drawElements(
+    gl.LINES,           // primitive type
+    numIndices,         //
+    gl.UNSIGNED_SHORT,  // type of indices
+    0,                  // offset
+);

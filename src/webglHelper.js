@@ -26,11 +26,50 @@ export function createProgram(gl, vertexShader, fragmentShader) {
     gl.deleteProgram(program);
 }
 
-export function createVertexArrayAttributes(gl, name, attributeArray, type, drawType = gl.STATIC_DRAW) {
-    let buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, attributeArray, drawType);
-    let location = gl.getAttribLocation(gl.program, name);
-    gl.vertexAttribPointer(location, 3, type, false, 0, 0);
-    gl.enableVertexAttribArray(location);
+export function createBuffersFromVertices(gl, vertices) {
+    // const buffers = {};
+    for (const key in vertices) {
+        let target, source;
+        if (key === 'indices') {
+            target = gl.ELEMENT_ARRAY_BUFFER;
+            source = new Uint16Array(vertices[key]);
+        } else {
+            target = gl.ARRAY_BUFFER;
+            source = new Float32Array(vertices[key]);
+        }
+
+        const buffer = gl.createBuffer();
+        // buffers[key] = buffer;
+        gl.bindBuffer(target, buffer);
+        gl.bufferData(target, source, gl.STATIC_DRAW);
+    }
+    // return buffers;
 }
+
+export function createPlaneVertices(gridWidth=40, gridDepth=40) {
+    const positions = [];
+    for (let z = 0; z <= gridDepth; ++z) {
+      for (let x = 0; x <= gridWidth; ++x) {
+        positions.push(x, 0, z);
+      }
+    }
+    
+    const indices = [];
+    const rowStride = gridWidth + 1;
+    // x lines
+    for (let z = 0; z <= gridDepth; ++z) {
+      const rowOff = z * rowStride;
+      for (let x = 0; x < gridWidth; ++x) {
+        indices.push(rowOff + x, rowOff + x + 1);
+      }
+    }
+    // z lines
+    for (let x = 0; x <= gridWidth; ++x) {
+      for (let z = 0; z < gridDepth; ++z) {
+        const rowOff = z * rowStride;
+        indices.push(rowOff + x, rowOff + x + rowStride);
+      }
+    }
+    return {positions, indices}
+}
+
