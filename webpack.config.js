@@ -22,7 +22,14 @@ module.exports = (env, options) => {
                 ]
               }
             },
-            'glslify-loader'
+            'glslify-loader',
+          ]
+        },
+        {
+          test: /\.js?$/, 
+          exclude: /node_modules/, 
+          use: [
+              { loader: "ifdef-loader", options: {DEBUG: (options.mode == "development")} } 
           ]
         }
       ]
@@ -32,6 +39,10 @@ module.exports = (env, options) => {
         template: 'src/index.html'
       })
     ],
+    optimization: {
+      usedExports: true,
+      sideEffects: false
+    },
     devServer: { 
       hot: false,
       open: {

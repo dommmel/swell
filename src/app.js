@@ -9,6 +9,11 @@ import {
     invertMatrix,
 } from './webglHelper';
 
+/// #if DEBUG
+import {GUI} from 'dat.gui';
+const gui = new GUI();
+/// #endif
+
 // Settings
 const GRIDWIDTH = 500;
 const GRIDDEPTH = 100;
