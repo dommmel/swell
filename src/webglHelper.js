@@ -106,8 +106,7 @@ export function createPlaneVertices(gridWidth=40, gridDepth=40) {
  * @param {Matrix4} [dst] matrix to hold result. If not passed a new one is created.
  * @return {Matrix4} The perspective matrix.
  */
- export function m4perspective(fieldOfViewYInRadians, aspect, zNear, zFar, dst) {
-    dst = dst || new Float32Array(16);
+ export function m4perspective(fieldOfViewYInRadians, aspect, zNear, zFar, dst=[]) {
   
     const f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewYInRadians);
     const rangeInv = 1.0 / (zNear - zFar);
