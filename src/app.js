@@ -9,18 +9,17 @@ import {
     invertMatrix,
 } from './webglHelper';
 
-//Create canvas
+// Settings
+const GRIDWIDTH = 100;
+const GRIDDEPTH = 60;
+const WAVEPARAMS = [5 ,0.2, 0.001];
 
+// Create canvas
 var canvas = document.querySelector("canvas");
 canvas.width = 800;
 canvas.height = 500;
 
 var gl = canvas.getContext("webgl2", {alpha: false});
-if (!gl) {
-    console.error("WebGL 2 not available");
-    document.body.innerHTML = "This example requires WebGL 2 which is unavailable on this system."
-}
-
 gl.clearColor(0, 0, 0, 1);
 
 /////////////////////
@@ -38,10 +37,6 @@ gl.useProgram(program);
 /////////////////////
 // SET UP GEOMETRY
 /////////////////////
-const gridWidth = 30;
-const gridDepth = 30;
-
-
 let numIndices = 0;
 {
     const attributeName = 'a_position';
@@ -53,7 +48,7 @@ let numIndices = 0;
                             // 0 = use the correct stride for type and numComponents
 
     const attribute = gl.getAttribLocation(program, attributeName);
-    const vertices = createPlaneVertices(gridWidth, gridDepth);
+    const vertices = createPlaneVertices(GRIDWIDTH, GRIDDEPTH);
     numIndices =+ vertices.indices.length;
 
     createBuffersFromVertices(gl, vertices);
@@ -68,39 +63,45 @@ let numIndices = 0;
 /////////////////////
 // SET UP VIEW & PERSPECTIVE
 /////////////////////
-
-const projection = m4perspective(
-    60 * Math.PI / 180,   // field of view, zoom
-    gl.canvas.clientWidth / gl.canvas.clientHeight, // aspect
-    0.1,  // near
-    gridWidth * gridDepth,  // far
-);
-const cameraPosition = [-gridWidth / 8, 10, -gridDepth / 8];
-const target = [gridWidth / 2, -10, gridDepth / 2];
-const up = [0, 1, 0];
-const camera = m4lookAt(cameraPosition, target, up);
-const view = invertMatrix(camera);
-const mat = multiplyMatrix(projection, view);
-
-{
-    const uniform = gl.getUniformLocation(program, 'u_modelViewPerspective');
-    gl.uniformMatrix4fv(uniform, false, mat);
+function createViewPerspectiveMatrix(u_time, a1, a2, a3) {
+    const height = a1*Math.sin(a2 + a3*u_time) + 2;
+    const projection = m4perspective(
+        60 * Math.PI / 180,   // field of view, zoom
+        gl.canvas.clientWidth / gl.canvas.clientHeight / 3, // aspect
+        0.1,  // near
+        GRIDWIDTH * GRIDDEPTH,  // far
+    );
+    const cameraPosition = [0, height+5, 20];
+    const target = [GRIDWIDTH/1 , -1, GRIDDEPTH / 1.5];
+    const up = [0.1, 1, 0.1*Math.sin(0.1 + a3*u_time)];
+    const camera = m4lookAt(cameraPosition, target, up);
+    const view = invertMatrix(camera);
+    const mat = multiplyMatrix(projection, view);
+    return mat;
 }
 
-const timeLocation = gl.getUniformLocation(program, "u_time"); 
 ////////////////
 // DRAW
 ////////////////
 let u_time = 0;
 let then = 0;
 
+const viewPerspectiveMatrixLoc = gl.getUniformLocation(program, 'u_viewPerspective');
+const waveParameterLoc = gl.getUniformLocation(program, "u_waveParameter"); 
+const timeLoc = gl.getUniformLocation(program, "u_time"); 
+
 // Draw the scene repeatedly
-function render(now) {
+
+function renderLoop(now) {
     const deltaTime = now - then;
     then = now;
+    u_time += deltaTime
 
     // set time uniform
-    gl.uniform1f(timeLocation, u_time += deltaTime);
+    gl.uniform1f(timeLoc, u_time);
+    const viewPerspectiveMatrix = createViewPerspectiveMatrix(u_time, ...WAVEPARAMS)
+    gl.uniformMatrix4fv(viewPerspectiveMatrixLoc, false, viewPerspectiveMatrix);
+    gl.uniform3fv(waveParameterLoc, WAVEPARAMS);
     
     gl.drawElements(
         gl.LINES,           // primitive type
@@ -108,7 +109,7 @@ function render(now) {
         gl.UNSIGNED_SHORT,  // type of indices
         0,                  // offset
     );  
-    requestAnimationFrame(render);
+    requestAnimationFrame(renderLoop);
 }
-requestAnimationFrame(render);
+requestAnimationFrame(renderLoop);
 

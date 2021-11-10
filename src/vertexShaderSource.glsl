@@ -1,16 +1,17 @@
 #version 300 es
 
 in vec4 a_position;
-uniform mat4 u_modelViewPerspective;  
+uniform mat4 u_viewPerspective;  
 uniform float u_time;
+uniform vec3 u_waveParameter;
 
 
 
 void main() {
-    float s_contrib = 1.0*sin(a_position.x*0.5 + 0.001*u_time);
+    float s_contrib = u_waveParameter[0]*sin(a_position.x*u_waveParameter[1] + u_waveParameter[2]*u_time);
 	// float t_contrib = 0.8*cos(a_position.y*4.1 + 1.0*u_time);
     float height = s_contrib;
 
     vec4 new_position = vec4(a_position.x, height, a_position.z, 1.0);
-    gl_Position = u_modelViewPerspective * new_position;
+    gl_Position = u_viewPerspective * new_position;
 }
