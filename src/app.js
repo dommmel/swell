@@ -1,9 +1,18 @@
-import { createShader, createProgram, createPlaneVertices, createBuffersFromVertices } from './webglHelper';
+import { 
+    m4perspective,
+    m4lookAt,
+    createShader,
+    createProgram,
+    createPlaneVertices,
+    createBuffersFromVertices,
+    multiplyMatrix,
+    invertMatrix,
+} from './webglHelper';
 
 //Create canvas
 
 var canvas = document.querySelector("canvas");
-canvas.width = 500;
+canvas.width = 800;
 canvas.height = 500;
 
 var gl = canvas.getContext("webgl2", {alpha: false});
@@ -29,8 +38,11 @@ gl.useProgram(program);
 /////////////////////
 // SET UP GEOMETRY
 /////////////////////
-let numIndices = 0;
+const gridWidth = 30;
+const gridDepth = 30;
 
+
+let numIndices = 0;
 {
     const attributeName = 'a_position';
     var numComponents = 3;  // (x, y, z)
@@ -41,7 +53,7 @@ let numIndices = 0;
                             // 0 = use the correct stride for type and numComponents
 
     const attribute = gl.getAttribLocation(program, attributeName);
-    const vertices = createPlaneVertices(40, 40);
+    const vertices = createPlaneVertices(gridWidth, gridDepth);
     numIndices =+ vertices.indices.length;
 
     createBuffersFromVertices(gl, vertices);
@@ -52,11 +64,33 @@ let numIndices = 0;
     gl.vertexAttribPointer(attribute, numComponents, type, normalize, stride, offset);
 
 }
+
+/////////////////////
+// SET UP VIEW & PERSPECTIVE
+/////////////////////
+
+const projection = m4perspective(
+    60 * Math.PI / 180,   // field of view, zoom
+    gl.canvas.clientWidth / gl.canvas.clientHeight, // aspect
+    0.1,  // near
+    gridWidth * gridDepth,  // far
+);
+const cameraPosition = [-gridWidth / 8, 10, -gridDepth / 8];
+const target = [gridWidth / 2, -10, gridDepth / 2];
+const up = [0, 1, 0];
+const camera = m4lookAt(cameraPosition, target, up);
+const view = invertMatrix(camera);
+const mat = multiplyMatrix(projection, view);
+
+{
+    const uniform = gl.getUniformLocation(program, 'u_modelViewPerspective');
+    gl.uniformMatrix4fv(uniform, false, mat);
+}
+
 ////////////////
 // DRAW
 ////////////////
-// gl.clear(gl.COLOR_BUFFER_BIT);
-
+//gl.clear(gl.COLOR_BUFFER_BIT);
 gl.drawElements(
     gl.LINES,           // primitive type
     numIndices,         //
