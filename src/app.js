@@ -87,13 +87,28 @@ const mat = multiplyMatrix(projection, view);
     gl.uniformMatrix4fv(uniform, false, mat);
 }
 
+const timeLocation = gl.getUniformLocation(program, "u_time"); 
 ////////////////
 // DRAW
 ////////////////
-//gl.clear(gl.COLOR_BUFFER_BIT);
-gl.drawElements(
-    gl.LINES,           // primitive type
-    numIndices,         //
-    gl.UNSIGNED_SHORT,  // type of indices
-    0,                  // offset
-);
+let u_time = 0;
+let then = 0;
+
+// Draw the scene repeatedly
+function render(now) {
+    const deltaTime = now - then;
+    then = now;
+
+    // set time uniform
+    gl.uniform1f(timeLocation, u_time += deltaTime);
+    
+    gl.drawElements(
+        gl.LINES,           // primitive type
+        numIndices,         //
+        gl.UNSIGNED_SHORT,  // type of indices
+        0,                  // offset
+    );  
+    requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+
