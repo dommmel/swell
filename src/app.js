@@ -8,22 +8,24 @@ import {
     multiplyMatrix,
     invertMatrix,
 } from './webglHelper';
+// Create canvas
+var canvas = document.querySelector("canvas");
+canvas.width = 800;
+canvas.height = 500;
+var gl = canvas.getContext("webgl2", {alpha: true, antialias: true});
+gl.clearColor(0, 0, 0, 1);
 
 // Settings
 const GRIDWIDTH = 500;
 const GRIDDEPTH = 100;
 let WAVEPARAMS = [11 ,0.06, 0.0015];
 let FOVY_ANGLE = 92;
-let CAMERA_X = -10;
-let CAMERA_Z = 20;
+let CAMERA_X = -110;
+let CAMERA_Z = -25;
+let CAMERA_HEIGHT = 10;
+let DRAW_MODE = gl.LINES;
 
-// Create canvas
-var canvas = document.querySelector("canvas");
-canvas.width = 800;
-canvas.height = 500;
 
-var gl = canvas.getContext("webgl2", {alpha: false});
-gl.clearColor(0, 0, 0, 1);
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // SET UP PROGRAM
@@ -50,7 +52,7 @@ let numIndices = 0;
     var stride = 0;         // how many bytes to move to the next vertex
                             // 0 = use the correct stride for type and numComponents
     const attribute = gl.getAttribLocation(program, attributeName);
-    const vertices = createPlaneVertices(GRIDWIDTH, GRIDDEPTH);
+    const vertices = createPlaneVertices();
     numIndices =+ vertices.indices.length;
 
     createBuffersFromVertices(gl, vertices);
@@ -71,7 +73,7 @@ function createViewPerspectiveMatrix(u_time, a1, a2, a3) {
         0.1,  // near
         1000,  // far
     );
-    const cameraPosition = [CAMERA_X, height+12, CAMERA_Z];
+    const cameraPosition = [CAMERA_X, height+CAMERA_HEIGHT, CAMERA_Z];
     const target = [GRIDWIDTH/1 , -1, GRIDDEPTH / 1.5];
     const up = [0.1, 1, 0.1*Math.sin(0.1 + a3*u_time)];
     const camera = m4lookAt(cameraPosition, target, up);
@@ -104,7 +106,7 @@ function renderLoop(now) {
     gl.uniform3fv(waveParameterLoc, WAVEPARAMS);
     
     gl.drawElements(
-        gl.LINES,           // primitive type
+        DRAW_MODE,           // primitive type
         numIndices,         //
         gl.UNSIGNED_SHORT,  // type of indices
         0,                  // offset
@@ -126,27 +128,33 @@ let settings = {
         length: WAVEPARAMS[1],
         speed: WAVEPARAMS[2],
     },
+    wireframe: true,
     camera: {
         fovy: FOVY_ANGLE,
         x: CAMERA_X,
         z: CAMERA_Z,
-    }
+        height: CAMERA_HEIGHT,
+    },
 }
 function setValues() {
     WAVEPARAMS=Object.values(settings.wave);
     FOVY_ANGLE=settings.camera.fovy;
     CAMERA_X=settings.camera.x;
     CAMERA_Z=settings.camera.z;
+    CAMERA_HEIGHT=settings.camera.height;
+    DRAW_MODE = (settings.wireframe) ? gl.LINES : gl.TRIANGLES;
 }
 const f1 = gui.addFolder("Wave");
 f1.add(settings.wave, 'height', 0, 50).onChange(setValues);
 f1.add(settings.wave, 'length',0, 1).onChange(setValues);
 f1.add(settings.wave, 'speed',0.00001, 0.02).onChange(setValues);
+f1.add(settings, 'wireframe', true).onChange(setValues);
 f1.open();
 
 const f2 = gui.addFolder("Camera");
 f2.add(settings.camera, 'fovy', 0, 180).onChange(setValues)
-f2.add(settings.camera, 'x', -5*GRIDDEPTH, 5*GRIDDEPTH).onChange(setValues)
-f2.add(settings.camera, 'z', -1*GRIDWIDTH/4, GRIDWIDTH/4).onChange(setValues)
+f2.add(settings.camera, 'x', -15*GRIDDEPTH, 15*GRIDDEPTH).onChange(setValues)
+f2.add(settings.camera, 'z', -1*GRIDWIDTH, GRIDWIDTH).onChange(setValues)
+f2.add(settings.camera, 'height', 0, 200).onChange(setValues)
 f2.open();
 /// #endif

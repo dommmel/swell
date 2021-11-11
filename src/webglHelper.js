@@ -46,32 +46,62 @@ export function createBuffersFromVertices(gl, vertices) {
     // return buffers;
 }
 
-export function createPlaneVertices(gridWidth=40, gridDepth=40) {
-    const positions = [];
-    for (let z = 0; z <= gridDepth; ++z) {
-      for (let x = 0; x <= gridWidth; ++x) {
-        positions.push(x, 0, z);
+export function createPlaneVertices(resolution=100, size=500) {
+    let vertices = [];
+    let indices = [];
+    for (let z = 0; z < resolution; z++) {
+      for (let x = 0; x < resolution; x++) {
+        vertices.push((x * size)/ (resolution - 1) - size/2.0);
+        vertices.push(0.0)
+        vertices.push((z * size)/ (resolution - 1) - size/2.0);
       }
     }
-    
-    const indices = [];
-    const rowStride = gridWidth + 1;
-    // x lines
-    for (let z = 0; z <= gridDepth; ++z) {
-      const rowOff = z * rowStride;
-      for (let x = 0; x < gridWidth; ++x) {
-        indices.push(rowOff + x, rowOff + x + 1);
+
+    indices = [];
+    for (let z = 0; z < resolution - 1; z++) {
+      for (let x = 0; x < resolution - 1; x++) {
+        let UL = z * resolution + x;
+        let UR = UL + 1;
+        let BL = UL + resolution;
+        let BR = BL + 1;
+        indices.push(UL);
+        indices.push(BL);
+        indices.push(BR);
+        indices.push(BR);
+        indices.push(UR);                
+        indices.push(UL);
       }
     }
-    // z lines
-    for (let x = 0; x <= gridWidth; ++x) {
-      for (let z = 0; z < gridDepth; ++z) {
-        const rowOff = z * rowStride;
-        indices.push(rowOff + x, rowOff + x + rowStride);
-      }
-    }
-    return {positions, indices}
+    return {vertices, indices};
+
 }
+
+// export function createPlaneVertices(gridWidth=40, gridDepth=40) {
+//     const positions = [];
+//     for (let z = 0; z <= gridDepth; ++z) {
+//       for (let x = 0; x <= gridWidth; ++x) {
+//         positions.push(x, 0, z);
+//       }
+//     }
+    
+//     const indices = [];
+//     const rowStride = gridWidth + 1;
+//     // x lines
+//     for (let z = 0; z <= gridDepth; ++z) {
+//       const rowOff = z * rowStride;
+//       for (let x = 0; x < gridWidth; ++x) {
+//         indices.push(rowOff + x, rowOff + x + 1);
+//       }
+//     }
+//     // z lines
+//     for (let x = 0; x <= gridWidth; ++x) {
+//       for (let z = 0; z < gridDepth; ++z) {
+//         const rowOff = z * rowStride;
+//         indices.push(rowOff + x, rowOff + x + rowStride);
+//       }
+//     }
+//     return {positions, indices};
+// }
 
 
 
@@ -139,7 +169,7 @@ export function createPlaneVertices(gridWidth=40, gridDepth=40) {
  * Creates a lookAt matrix.
  * This is a world matrix for a camera. In other words it will transform
  * from the origin to a place and orientation in the world. For a view
- * matrix take the inverse of this.
+ * matrix take the inverse of 
  * @param {Vector3} cameraPosition position of the camera
  * @param {Vector3} target position of the target
  * @param {Vector3} up direction
