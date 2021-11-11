@@ -9,15 +9,13 @@ import {
     invertMatrix,
 } from './webglHelper';
 
-/// #if DEBUG
-import {GUI} from 'dat.gui';
-const gui = new GUI();
-/// #endif
-
 // Settings
 const GRIDWIDTH = 500;
 const GRIDDEPTH = 100;
-const WAVEPARAMS = [8 ,0.2, 0.0015];
+let WAVEPARAMS = [11 ,0.06, 0.0015];
+let FOVY_ANGLE = 92;
+let CAMERA_X = -10;
+let CAMERA_Z = 20;
 
 // Create canvas
 var canvas = document.querySelector("canvas");
@@ -66,14 +64,14 @@ let numIndices = 0;
 // SET UP CAMERA
 ////////////////////////////////////////////////////////////////////////////////////////
 function createViewPerspectiveMatrix(u_time, a1, a2, a3) {
-    const height = a1*Math.sin(a2 + a3*u_time) + 2;
+    const height = a1*Math.sin(a2 + a3*u_time);
     const projection = m4perspective(
-        60 * Math.PI / 180,   // field of view, zoom
+        FOVY_ANGLE * Math.PI / 180,   // field of view, zoom
         gl.canvas.clientWidth / gl.canvas.clientHeight / 4, // aspect
         0.1,  // near
         1000,  // far
     );
-    const cameraPosition = [0, height+12, 20];
+    const cameraPosition = [CAMERA_X, height+12, CAMERA_Z];
     const target = [GRIDWIDTH/1 , -1, GRIDDEPTH / 1.5];
     const up = [0.1, 1, 0.1*Math.sin(0.1 + a3*u_time)];
     const camera = m4lookAt(cameraPosition, target, up);
@@ -115,3 +113,40 @@ function renderLoop(now) {
 }
 requestAnimationFrame(renderLoop);
 
+
+////////////////////////////////////////////////////////////////////////////////////////
+/// #if DEBUG
+//  This code blocks gets only included when webpack mode = "development"
+////////////////////////////////////////////////////////////////////////////////////////
+import {GUI} from 'dat.gui';
+const gui = new GUI();
+let settings = {
+    wave: {
+        height: WAVEPARAMS[0],
+        length: WAVEPARAMS[1],
+        speed: WAVEPARAMS[2],
+    },
+    camera: {
+        fovy: FOVY_ANGLE,
+        x: CAMERA_X,
+        z: CAMERA_Z,
+    }
+}
+function setValues() {
+    WAVEPARAMS=Object.values(settings.wave);
+    FOVY_ANGLE=settings.camera.fovy;
+    CAMERA_X=settings.camera.x;
+    CAMERA_Z=settings.camera.z;
+}
+const f1 = gui.addFolder("Wave");
+f1.add(settings.wave, 'height', 0, 50).onChange(setValues);
+f1.add(settings.wave, 'length',0, 1).onChange(setValues);
+f1.add(settings.wave, 'speed',0.00001, 0.02).onChange(setValues);
+f1.open();
+
+const f2 = gui.addFolder("Camera");
+f2.add(settings.camera, 'fovy', 0, 180).onChange(setValues)
+f2.add(settings.camera, 'x', -5*GRIDDEPTH, 5*GRIDDEPTH).onChange(setValues)
+f2.add(settings.camera, 'z', -1*GRIDWIDTH/4, GRIDWIDTH/4).onChange(setValues)
+f2.open();
+/// #endif
