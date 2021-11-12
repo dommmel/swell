@@ -10,24 +10,36 @@ import {
 } from './webglHelper';
 // Create canvas
 var canvas = document.querySelector("canvas");
-canvas.width = 800;
-canvas.height = 500;
+canvas.width = 900;
+canvas.height = 900;
 var gl = canvas.getContext("webgl2", {alpha: true, antialias: true});
 gl.clearColor(0, 0, 0, 1);
 
 // Settings
 const GRID_SIZE = 500;
 const GRID_RESOLUTION= 256;
-let WAVEPARAMS = [7 ,0.06, 0.0015];
-let FOVY_ANGLE = 17;
-let CAMERA_X = -231;
-let CAMERA_Z = 133;
+
+let WAVEPARAMS = [11 ,0.06, 0.00075];
+let FOVY_ANGLE = 56;
+let CAMERA_X = -220;
+let CAMERA_Z = -21;
 let CAMERA_HEIGHT = 10;
 let DRAW_MODE = gl.TRIANGLES;
-let TARGET_X = 100;
-let TARGET_Y = 1;
-let TARGET_Z = 23;
+let TARGET_X = 47;
+let TARGET_Y = -21;
+let TARGET_Z = -10;
 let ASPECT_MULTIPLIER = 1;
+
+// let WAVEPARAMS = [7 ,0.06, 0.0015];
+// let FOVY_ANGLE = 17;
+// let CAMERA_X = -231;
+// let CAMERA_Z = 133;
+// let CAMERA_HEIGHT = 10;
+// let DRAW_MODE = gl.TRIANGLES;
+// let TARGET_X = 100;
+// let TARGET_Y = 1;
+// let TARGET_Z = 23;
+// let ASPECT_MULTIPLIER = 1;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // SET UP PROGRAM
