@@ -16,14 +16,14 @@ var gl = canvas.getContext("webgl2", {alpha: true, antialias: true});
 gl.clearColor(0, 0, 0, 1);
 
 // Settings
-const GRIDWIDTH = 500;
-const GRIDDEPTH = 100;
+const GRID_SIZE = 500;
+const GRID_RESOLUTION= 256;
 let WAVEPARAMS = [11 ,0.06, 0.0015];
 let FOVY_ANGLE = 92;
 let CAMERA_X = -110;
 let CAMERA_Z = -25;
 let CAMERA_HEIGHT = 10;
-let DRAW_MODE = gl.LINES;
+let DRAW_MODE = gl.TRIANGLES;
 
 
 
@@ -52,7 +52,7 @@ let numIndices = 0;
     var stride = 0;         // how many bytes to move to the next vertex
                             // 0 = use the correct stride for type and numComponents
     const attribute = gl.getAttribLocation(program, attributeName);
-    const vertices = createPlaneVertices();
+    const vertices = createPlaneVertices(GRID_SIZE,GRID_RESOLUTION);
     numIndices =+ vertices.indices.length;
 
     createBuffersFromVertices(gl, vertices);
@@ -74,7 +74,7 @@ function createViewPerspectiveMatrix(u_time, a1, a2, a3) {
         1000,  // far
     );
     const cameraPosition = [CAMERA_X, height+CAMERA_HEIGHT, CAMERA_Z];
-    const target = [GRIDWIDTH/1 , -1, GRIDDEPTH / 1.5];
+    const target = [GRID_SIZE/1 , -1, GRID_SIZE / 1.5];
     const up = [0.1, 1, 0.1*Math.sin(0.1 + a3*u_time)];
     const camera = m4lookAt(cameraPosition, target, up);
     const view = invertMatrix(camera);
@@ -128,7 +128,7 @@ let settings = {
         length: WAVEPARAMS[1],
         speed: WAVEPARAMS[2],
     },
-    wireframe: true,
+    wireframe: false,
     camera: {
         fovy: FOVY_ANGLE,
         x: CAMERA_X,
@@ -148,13 +148,13 @@ const f1 = gui.addFolder("Wave");
 f1.add(settings.wave, 'height', 0, 50).onChange(setValues);
 f1.add(settings.wave, 'length',0, 1).onChange(setValues);
 f1.add(settings.wave, 'speed',0.00001, 0.02).onChange(setValues);
-f1.add(settings, 'wireframe', true).onChange(setValues);
+f1.add(settings, 'wireframe').onChange(setValues);
 f1.open();
 
 const f2 = gui.addFolder("Camera");
 f2.add(settings.camera, 'fovy', 0, 180).onChange(setValues)
-f2.add(settings.camera, 'x', -15*GRIDDEPTH, 15*GRIDDEPTH).onChange(setValues)
-f2.add(settings.camera, 'z', -1*GRIDWIDTH, GRIDWIDTH).onChange(setValues)
+f2.add(settings.camera, 'x', -15*GRID_SIZE, 15*GRID_SIZE).onChange(setValues)
+f2.add(settings.camera, 'z', -10*GRID_SIZE, 10*GRID_SIZE).onChange(setValues)
 f2.add(settings.camera, 'height', 0, 200).onChange(setValues)
 f2.open();
 /// #endif

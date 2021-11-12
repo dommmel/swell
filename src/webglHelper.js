@@ -46,7 +46,7 @@ export function createBuffersFromVertices(gl, vertices) {
     // return buffers;
 }
 
-export function createPlaneVertices(resolution=100, size=500) {
+export function createPlaneVertices(size=500,resolution=100) {
     let vertices = [];
     let indices = [];
     for (let z = 0; z < resolution; z++) {
@@ -76,44 +76,11 @@ export function createPlaneVertices(resolution=100, size=500) {
 
 }
 
-// export function createPlaneVertices(gridWidth=40, gridDepth=40) {
-//     const positions = [];
-//     for (let z = 0; z <= gridDepth; ++z) {
-//       for (let x = 0; x <= gridWidth; ++x) {
-//         positions.push(x, 0, z);
-//       }
-//     }
-    
-//     const indices = [];
-//     const rowStride = gridWidth + 1;
-//     // x lines
-//     for (let z = 0; z <= gridDepth; ++z) {
-//       const rowOff = z * rowStride;
-//       for (let x = 0; x < gridWidth; ++x) {
-//         indices.push(rowOff + x, rowOff + x + 1);
-//       }
-//     }
-//     // z lines
-//     for (let x = 0; x <= gridWidth; ++x) {
-//       for (let z = 0; z < gridDepth; ++z) {
-//         const rowOff = z * rowStride;
-//         indices.push(rowOff + x, rowOff + x + rowStride);
-//       }
-//     }
-//     return {positions, indices};
-// }
 
 
-
-
-
-////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
 // M4
-///////////////
-
-
-
-
+//////////////////////////////////////////////////////////////////////////////////////////
 
 
 /**
