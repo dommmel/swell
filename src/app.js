@@ -18,14 +18,16 @@ gl.clearColor(0, 0, 0, 1);
 // Settings
 const GRID_SIZE = 500;
 const GRID_RESOLUTION= 256;
-let WAVEPARAMS = [11 ,0.06, 0.0015];
-let FOVY_ANGLE = 92;
-let CAMERA_X = -110;
-let CAMERA_Z = -25;
+let WAVEPARAMS = [7 ,0.06, 0.0015];
+let FOVY_ANGLE = 17;
+let CAMERA_X = -231;
+let CAMERA_Z = 133;
 let CAMERA_HEIGHT = 10;
 let DRAW_MODE = gl.TRIANGLES;
-
-
+let TARGET_X = 100;
+let TARGET_Y = 1;
+let TARGET_Z = 23;
+let ASPECT_MULTIPLIER = 1;
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // SET UP PROGRAM
@@ -69,12 +71,12 @@ function createViewPerspectiveMatrix(u_time, a1, a2, a3) {
     const height = a1*Math.sin(a2 + a3*u_time);
     const projection = m4perspective(
         FOVY_ANGLE * Math.PI / 180,   // field of view, zoom
-        gl.canvas.clientWidth / gl.canvas.clientHeight / 4, // aspect
+        gl.canvas.clientWidth / gl.canvas.clientHeight * ASPECT_MULTIPLIER, // aspect
         0.1,  // near
         1000,  // far
     );
     const cameraPosition = [CAMERA_X, height+CAMERA_HEIGHT, CAMERA_Z];
-    const target = [GRID_SIZE/1 , -1, GRID_SIZE / 1.5];
+    const target = [TARGET_X , TARGET_Y, TARGET_Z];
     const up = [0.1, 1, 0.1*Math.sin(0.1 + a3*u_time)];
     const camera = m4lookAt(cameraPosition, target, up);
     const view = invertMatrix(camera);
@@ -134,6 +136,10 @@ let settings = {
         x: CAMERA_X,
         z: CAMERA_Z,
         height: CAMERA_HEIGHT,
+        aspect: ASPECT_MULTIPLIER,
+        target_x: TARGET_X,
+        target_y: TARGET_Y,
+        target_z: TARGET_Z,
     },
 }
 function setValues() {
@@ -141,6 +147,10 @@ function setValues() {
     FOVY_ANGLE=settings.camera.fovy;
     CAMERA_X=settings.camera.x;
     CAMERA_Z=settings.camera.z;
+    TARGET_X=settings.camera.target_x;
+    TARGET_Y=settings.camera.target_y;
+    TARGET_Z=settings.camera.target_z;
+    ASPECT_MULTIPLIER=settings.camera.aspect;
     CAMERA_HEIGHT=settings.camera.height;
     DRAW_MODE = (settings.wireframe) ? gl.LINES : gl.TRIANGLES;
 }
@@ -153,8 +163,12 @@ f1.open();
 
 const f2 = gui.addFolder("Camera");
 f2.add(settings.camera, 'fovy', 0, 180).onChange(setValues)
-f2.add(settings.camera, 'x', -15*GRID_SIZE, 15*GRID_SIZE).onChange(setValues)
-f2.add(settings.camera, 'z', -10*GRID_SIZE, 10*GRID_SIZE).onChange(setValues)
+f2.add(settings.camera, 'x', -GRID_SIZE, GRID_SIZE).onChange(setValues)
+f2.add(settings.camera, 'z', -GRID_SIZE, GRID_SIZE).onChange(setValues)
 f2.add(settings.camera, 'height', 0, 200).onChange(setValues)
+f2.add(settings.camera, 'target_x', -GRID_SIZE*4, GRID_SIZE*4).onChange(setValues)
+f2.add(settings.camera, 'target_y', -GRID_SIZE, GRID_SIZE).onChange(setValues)
+f2.add(settings.camera, 'target_z', -GRID_SIZE, GRID_SIZE).onChange(setValues)
+f2.add(settings.camera, 'aspect', 0.1, 10).onChange(setValues)
 f2.open();
 /// #endif
