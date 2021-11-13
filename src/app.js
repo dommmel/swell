@@ -14,19 +14,21 @@ canvas.width = 900;
 canvas.height = 900;
 var gl = canvas.getContext("webgl2", {alpha: true, antialias: true});
 gl.clearColor(0, 0, 0, 1);
+// gl.enable(gl.CULL_FACE);
+
 
 // Settings
 const GRID_SIZE = 500;
-const GRID_RESOLUTION= 256;
+const GRID_RESOLUTION= 251;
 
 let WAVEPARAMS = [11 ,0.06, 0.00075];
 let FOVY_ANGLE = 56;
-let CAMERA_X = -220;
+let CAMERA_X = -250;
 let CAMERA_Z = -21;
 let CAMERA_HEIGHT = 10;
 let DRAW_MODE = gl.TRIANGLES;
-let TARGET_X = 47;
-let TARGET_Y = -21;
+let TARGET_X = 500;
+let TARGET_Y = 0;
 let TARGET_Z = -10;
 let ASPECT_MULTIPLIER = 1;
 
@@ -67,6 +69,7 @@ let numIndices = 0;
                             // 0 = use the correct stride for type and numComponents
     const attribute = gl.getAttribLocation(program, attributeName);
     const vertices = createPlaneVertices(GRID_SIZE,GRID_RESOLUTION);
+    console.log(vertices);
     numIndices =+ vertices.indices.length;
 
     createBuffersFromVertices(gl, vertices);
@@ -80,7 +83,7 @@ let numIndices = 0;
 // SET UP CAMERA
 ////////////////////////////////////////////////////////////////////////////////////////
 function createViewPerspectiveMatrix(u_time, a1, a2, a3) {
-    const height = a1*Math.sin(a2 + a3*u_time);
+    const height = a1*Math.sin(CAMERA_X*a2 + a3*u_time);
     const projection = m4perspective(
         FOVY_ANGLE * Math.PI / 180,   // field of view, zoom
         gl.canvas.clientWidth / gl.canvas.clientHeight * ASPECT_MULTIPLIER, // aspect
@@ -168,7 +171,7 @@ function setValues() {
 }
 const f1 = gui.addFolder("Wave");
 f1.add(settings.wave, 'height', 0, 50).onChange(setValues);
-f1.add(settings.wave, 'length',0, 1).onChange(setValues);
+f1.add(settings.wave, 'length',0, 0.2).onChange(setValues);
 f1.add(settings.wave, 'speed',0.00001, 0.02).onChange(setValues);
 f1.add(settings, 'wireframe').onChange(setValues);
 f1.open();
