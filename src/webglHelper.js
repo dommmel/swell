@@ -11,6 +11,18 @@ export function createShader(gl, type, source) {
     gl.deleteShader(shader);
 } 
 
+// Interpolates two [r,g,b] colors and returns an [r,g,b] of the result
+// Taken from the awesome ROT.js roguelike dev library at
+// https://github.com/ondras/rot.js
+export function interpolateColor (color1, color2, factor) {
+    if (arguments.length < 3) { factor = 0.5; }
+    var result = color1.slice();
+    for (var i=0;i<3;i++) {
+        result[i] = Math.round(result[i] + factor*(color2[i]-color1[i]));
+    }
+    return result;
+};
+
 export function createProgram(gl, vertexShader, fragmentShader) {
     var program = gl.createProgram();
     gl.attachShader(program, vertexShader);
@@ -49,12 +61,20 @@ export function createBuffersFromVertices(gl, vertices) {
 export function createPlaneVertices(size=500,resolution=100) {
     let vertices = [];
     let indices = [];
+    let colors = [];
+
+    // var colourSpectrum = ['ff0000', 'ffff00', '00ff00', '0000ff']; 
+    const endColor = [0,0,255];
+    const startColor = [176,224,230];
+
     for (let z = 0; z < resolution; z++) {
-      for (let x = 0; x < resolution; x++) {
-        vertices.push((x * size)/ (resolution - 1) - size/2.0);
-        vertices.push(0.0)
-        vertices.push((z * size)/ (resolution - 1) - size/2.0);
-      }
+        for (let x = 0; x < resolution; x++) {
+            vertices.push((x * size)/ (resolution - 1) - size/2.0);
+            vertices.push(0.0)
+            vertices.push((z * size)/ (resolution - 1) - size/2.0);
+            const _colors = interpolateColor(startColor, endColor, x/resolution)
+            colors.push(_colors[0]/255,_colors[1]/255,_colors[2]/255);
+        }
     }
 
     indices = [];
@@ -72,7 +92,7 @@ export function createPlaneVertices(size=500,resolution=100) {
         indices.push(UL);
       }
     }
-    return {vertices, indices};
+    return {vertices, indices, colors};
 
 }
 

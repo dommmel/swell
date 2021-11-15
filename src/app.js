@@ -7,13 +7,14 @@ import {
     createBuffersFromVertices,
     multiplyMatrix,
     invertMatrix,
+    interpolateColor,
 } from './webglHelper';
 // Create canvas
 var canvas = document.querySelector("canvas");
 canvas.width = 900;
 canvas.height = 900;
 var gl = canvas.getContext("webgl2", {alpha: true, antialias: true});
-gl.clearColor(0, 0, 0, 1);
+gl.clearColor(1.,0.898,0.8, 1);
 // gl.enable(gl.CULL_FACE);
 
 
@@ -21,11 +22,11 @@ gl.clearColor(0, 0, 0, 1);
 const GRID_SIZE = 500;
 const GRID_RESOLUTION= 251;
 
-let WAVEPARAMS = [11 ,0.06, 0.00075];
-let FOVY_ANGLE = 56;
+let WAVEPARAMS = [7 ,0.06, 0.00075];
+let FOVY_ANGLE = 46;
 let CAMERA_X = -250;
 let CAMERA_Z = -21;
-let CAMERA_HEIGHT = 10;
+let CAMERA_HEIGHT = 19;
 let DRAW_MODE = gl.TRIANGLES;
 let TARGET_X = 500;
 let TARGET_Y = 0;
@@ -60,23 +61,34 @@ gl.useProgram(program);
 ////////////////////////////////////////////////////////////////////////////////////////
 let numIndices = 0;
 {
-    const attributeName = 'a_position';
+
     var numComponents = 3;  // (x, y, z)
     var type = gl.FLOAT;    // 32bit floating point values
     var normalize = false;  // leave the values as they are
     var offset = 0;         // start at the beginning of the buffer
     var stride = 0;         // how many bytes to move to the next vertex
                             // 0 = use the correct stride for type and numComponents
-    const attribute = gl.getAttribLocation(program, attributeName);
-    const vertices = createPlaneVertices(GRID_SIZE,GRID_RESOLUTION);
-    console.log(vertices);
-    numIndices =+ vertices.indices.length;
 
-    createBuffersFromVertices(gl, vertices);
+    const {vertices, indices, colors} = createPlaneVertices(GRID_SIZE,GRID_RESOLUTION);
+    console.log({vertices, indices, colors});
+    numIndices =+ indices.length;
+    {
+        createBuffersFromVertices(gl, {vertices, indices});
+        const attribute = gl.getAttribLocation(program, "a_position");
+        console.log(attribute);
 
-    // turn on getting data out of a buffer for this attribute
-    gl.enableVertexAttribArray(attribute);
-    gl.vertexAttribPointer(attribute, numComponents, type, normalize, stride, offset);
+        gl.enableVertexAttribArray(attribute);
+        gl.vertexAttribPointer(attribute, numComponents, type, normalize, stride, offset);
+    }
+    {
+        createBuffersFromVertices(gl, {colors, indices});
+        console.log({colors});
+        
+        const attribute = gl.getAttribLocation(program, "a_color");
+        console.log(attribute);
+        gl.enableVertexAttribArray(attribute);
+        gl.vertexAttribPointer(attribute, 3, type, normalize, stride, offset);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +124,10 @@ const timeLoc = gl.getUniformLocation(program, "u_time");
 // Draw the scene repeatedly
 function renderLoop(now) {
     gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST); // enabled by default, but let's be SURE.
+    gl.clearDepth(0.0);       // each time we 'clear' our depth buffer, set all
+                            // pixel depths to 0.0  (1.0 is DEFAULT)
+
     const deltaTime = now - then;
     then = now;
     u_time += deltaTime
