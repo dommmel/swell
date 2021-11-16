@@ -9,30 +9,32 @@ import {
     invertMatrix,
     interpolateColor,
 } from './webglHelper';
+
 // Create canvas
 var canvas = document.querySelector("canvas");
 canvas.width = 900;
-canvas.height = 900;
+canvas.height = 800;
 var gl = canvas.getContext("webgl2", {alpha: true, antialias: true});
-gl.clearColor(1.,0.898,0.8, 1);
+// gl.clearColor(1.,0.898,0.8, 1);
 // gl.enable(gl.CULL_FACE);
 
-
 // Settings
-const GRID_SIZE = 500;
-const GRID_RESOLUTION= 251;
+let GRID_SIZE = 800;
+const GRID_RESOLUTION= 451;
 
 let WAVEPARAMS = [7 ,0.06, 0.00075];
 let FOVY_ANGLE = 46;
-let CAMERA_X = -250;
+let CAMERA_X = -GRID_SIZE/2;
 let CAMERA_Z = -21;
 let CAMERA_HEIGHT = 19;
 let DRAW_MODE = gl.TRIANGLES;
 let TARGET_X = 500;
 let TARGET_Y = 0;
-let TARGET_Z = -10;
+let TARGET_Z = -7;
 let ASPECT_MULTIPLIER = 1;
-
+let BACKGROUND_COLOR = [255,229,204];
+let START_COLOR =  [0,56,255];
+let END_COLOR = [255, 255, 255];
 // let WAVEPARAMS = [7 ,0.06, 0.0015];
 // let FOVY_ANGLE = 17;
 // let CAMERA_X = -231;
@@ -60,7 +62,7 @@ gl.useProgram(program);
 // SET UP GEOMETRY
 ////////////////////////////////////////////////////////////////////////////////////////
 let numIndices = 0;
-{
+function setup(){
 
     var numComponents = 3;  // (x, y, z)
     var type = gl.FLOAT;    // 32bit floating point values
@@ -69,27 +71,26 @@ let numIndices = 0;
     var stride = 0;         // how many bytes to move to the next vertex
                             // 0 = use the correct stride for type and numComponents
 
-    const {vertices, indices, colors} = createPlaneVertices(GRID_SIZE,GRID_RESOLUTION);
-    console.log({vertices, indices, colors});
+    const {vertices, indices, colors} = createPlaneVertices( GRID_SIZE, GRID_RESOLUTION, 2, START_COLOR, END_COLOR);
     numIndices =+ indices.length;
     {
         createBuffersFromVertices(gl, {vertices, indices});
         const attribute = gl.getAttribLocation(program, "a_position");
-        console.log(attribute);
 
         gl.enableVertexAttribArray(attribute);
         gl.vertexAttribPointer(attribute, numComponents, type, normalize, stride, offset);
     }
     {
-        createBuffersFromVertices(gl, {colors, indices});
-        console.log({colors});
+        createBuffersFromVertices(gl, {colors});
         
         const attribute = gl.getAttribLocation(program, "a_color");
-        console.log(attribute);
         gl.enableVertexAttribArray(attribute);
         gl.vertexAttribPointer(attribute, 3, type, normalize, stride, offset);
     }
+    gl.clearColor(BACKGROUND_COLOR[0]/255,BACKGROUND_COLOR[1]/255,BACKGROUND_COLOR[2]/255,1);
+
 }
+setup()
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // SET UP CAMERA
@@ -100,7 +101,7 @@ function createViewPerspectiveMatrix(u_time, a1, a2, a3) {
         FOVY_ANGLE * Math.PI / 180,   // field of view, zoom
         gl.canvas.clientWidth / gl.canvas.clientHeight * ASPECT_MULTIPLIER, // aspect
         0.1,  // near
-        1000,  // far
+        10000,  // far
     );
     const cameraPosition = [CAMERA_X, height+CAMERA_HEIGHT, CAMERA_Z];
     const target = [TARGET_X , TARGET_Y, TARGET_Z];
@@ -154,13 +155,20 @@ requestAnimationFrame(renderLoop);
 //  This code blocks gets only included when webpack mode = "development"
 ////////////////////////////////////////////////////////////////////////////////////////
 import {GUI} from 'dat.gui';
-const gui = new GUI();
+import presets from './presets.json'
+
 let settings = {
+    colors: {
+        background: BACKGROUND_COLOR,
+        wave_start: START_COLOR,
+        wave_end: END_COLOR,
+    },
     wave: {
         height: WAVEPARAMS[0],
         length: WAVEPARAMS[1],
         speed: WAVEPARAMS[2],
     },
+    gridSize: GRID_SIZE,
     wireframe: false,
     camera: {
         fovy: FOVY_ANGLE,
@@ -183,18 +191,28 @@ function setValues() {
     TARGET_Z=settings.camera.target_z;
     ASPECT_MULTIPLIER=settings.camera.aspect;
     CAMERA_HEIGHT=settings.camera.height;
-    DRAW_MODE = (settings.wireframe) ? gl.LINES : gl.TRIANGLES;
+    DRAW_MODE = (settings.wireframe) ? gl.LINES : gl.TRIANGLE_STRIP;
+    BACKGROUND_COLOR = settings.colors.background;
+    START_COLOR = settings.colors.wave_start;
+    END_COLOR = settings.colors.wave_end;
+    GRID_SIZE = settings.gridSize;
 }
+const gui = new GUI({load: presets});
+gui.remember(settings);
+gui.remember(settings.wave);
+gui.remember(settings.camera);
+gui.remember(settings.colors);
+gui.add(settings, 'wireframe').onChange(setValues);
+gui.add(settings, 'gridSize',100, 5000).onChange(function(){setValues();setup()});
 const f1 = gui.addFolder("Wave");
 f1.add(settings.wave, 'height', 0, 50).onChange(setValues);
 f1.add(settings.wave, 'length',0, 0.2).onChange(setValues);
 f1.add(settings.wave, 'speed',0.00001, 0.02).onChange(setValues);
-f1.add(settings, 'wireframe').onChange(setValues);
 f1.open();
 
 const f2 = gui.addFolder("Camera");
 f2.add(settings.camera, 'fovy', 0, 180).onChange(setValues)
-f2.add(settings.camera, 'x', -GRID_SIZE, GRID_SIZE).onChange(setValues)
+f2.add(settings.camera, 'x', -10000, 10000).onChange(setValues)
 f2.add(settings.camera, 'z', -GRID_SIZE, GRID_SIZE).onChange(setValues)
 f2.add(settings.camera, 'height', 0, 200).onChange(setValues)
 f2.add(settings.camera, 'target_x', -GRID_SIZE*4, GRID_SIZE*4).onChange(setValues)
@@ -202,4 +220,10 @@ f2.add(settings.camera, 'target_y', -GRID_SIZE, GRID_SIZE).onChange(setValues)
 f2.add(settings.camera, 'target_z', -GRID_SIZE, GRID_SIZE).onChange(setValues)
 f2.add(settings.camera, 'aspect', 0.1, 10).onChange(setValues)
 f2.open();
+
+const f3 = gui.addFolder("Colors");
+f3.addColor(settings.colors, 'wave_start').onChange(function(){setValues();setup()});
+f3.addColor(settings.colors, 'wave_end').onChange(function(){setValues();setup()});
+f3.addColor(settings.colors, 'background').onChange(function(){setValues();setup()});
+f3.open();
 /// #endif

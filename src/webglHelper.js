@@ -58,31 +58,91 @@ export function createBuffersFromVertices(gl, vertices) {
     // return buffers;
 }
 
-export function createPlaneVertices(size=500,resolution=100) {
+export function createPlaneVertices2( width = 500, height = 500, widthSegments = 250, heightSegments = 250 ,startColor, endColor) {
+
+    const width_half = width / 2;
+    const height_half = height / 2;
+
+    const gridX = Math.floor( widthSegments );
+    const gridY = Math.floor( heightSegments );
+
+    const gridX1 = gridX + 1;
+    const gridY1 = gridY + 1;
+
+    const segment_width = width / gridX;
+    const segment_height = height / gridY;
+
+    const indices = [];
+    const vertices = [];
+    const normals = [];
+    const uvs = [];
+    const colors = [];
+
+
+    for ( let iz = 0; iz < gridY1; iz ++ ) {
+
+        const z = iz * segment_height - height_half;
+
+        for ( let ix = 0; ix < gridX1; ix ++ ) {
+
+            const x = ix * segment_width - width_half;
+
+            vertices.push( x, 0, -z );
+
+            normals.push( 0, 0, 1 );
+
+            uvs.push( ix / gridX );
+            uvs.push( 1 - ( iz / gridY ) );
+
+            const _colors = interpolateColor(endColor,startColor,ix/gridX1)
+            colors.push(_colors[0]/255,_colors[1]/255,_colors[2]/255);
+
+
+        }
+
+    }
+
+    for ( let iz = 0; iz < gridY; iz ++ ) {
+
+        for ( let ix = 0; ix < gridX; ix ++ ) {
+
+            const a = ix + gridX1 * iz;
+            const b = ix + gridX1 * ( iz + 1 );
+            const c = ( ix + 1 ) + gridX1 * ( iz + 1 );
+            const d = ( ix + 1 ) + gridX1 * iz;
+
+            indices.push( a, b, d );
+            indices.push( b, c, d );
+
+        }
+
+    }
+    return {vertices, indices, colors};
+}
+
+export function createPlaneVertices(size=500,resolutionX=100,resolutionZ=100, startColor, endColor) {
     let vertices = [];
     let indices = [];
     let colors = [];
 
     // var colourSpectrum = ['ff0000', 'ffff00', '00ff00', '0000ff']; 
-    const endColor = [0,0,255];
-    const startColor = [176,224,230];
 
-    for (let z = 0; z < resolution; z++) {
-        for (let x = 0; x < resolution; x++) {
-            vertices.push((x * size)/ (resolution - 1) - size/2.0);
+    for (let z = 0; z < resolutionZ; z++) {
+        for (let x = 0; x < resolutionX; x++) {
+            vertices.push((x * size)/ (resolutionX - 1) - size/2.0);
             vertices.push(0.0)
-            vertices.push((z * size)/ (resolution - 1) - size/2.0);
-            const _colors = interpolateColor(startColor, endColor, x/resolution)
+            vertices.push((z * size)/ (resolutionZ - 1) - size/2.0);
+            const _colors = interpolateColor(endColor,startColor,x/resolutionX)
             colors.push(_colors[0]/255,_colors[1]/255,_colors[2]/255);
         }
     }
 
     indices = [];
-    for (let z = 0; z < resolution - 1; z++) {
-      for (let x = 0; x < resolution - 1; x++) {
-        let UL = z * resolution + x;
+    for (let z = 0; z < resolutionZ - 1; z++) {
+      for (let x = 0; x < resolutionX - 1; x++) {
+        let UL = z * resolutionX + x;
         let UR = UL + 1;
-        let BL = UL + resolution;
+        let BL = UL + resolutionX;
         let BR = BL + 1;
         indices.push(UL);
         indices.push(BL);
@@ -93,7 +153,6 @@ export function createPlaneVertices(size=500,resolution=100) {
       }
     }
     return {vertices, indices, colors};
-
 }
 
 
