@@ -8,12 +8,19 @@ import {
     multiplyMatrix,
     invertMatrix,
     interpolateColor,
+    Random
 } from './webglHelper';
 
 // Create canvas
+var WIDTH = window.innerWidth
+var HEIGHT = window.innerHeight
+// var DEFAULT_SIZE = 800
+// var DIM = Math.min(WIDTH, HEIGHT)
+// var M = DIM / DEFAULT_SIZE
+
 var canvas = document.querySelector("canvas");
-canvas.width = 900;
-canvas.height = 800;
+canvas.width = Math.min(WIDTH, HEIGHT);
+canvas.height = Math.min(WIDTH, HEIGHT);
 var gl = canvas.getContext("webgl2", {alpha: true, antialias: true});
 // gl.clearColor(1.,0.898,0.8, 1);
 // gl.enable(gl.CULL_FACE);
@@ -35,16 +42,7 @@ let ASPECT_MULTIPLIER = 1;
 let BACKGROUND_COLOR = [255,229,204];
 let START_COLOR =  [0,56,255];
 let END_COLOR = [255, 255, 255];
-// let WAVEPARAMS = [7 ,0.06, 0.0015];
-// let FOVY_ANGLE = 17;
-// let CAMERA_X = -231;
-// let CAMERA_Z = 133;
-// let CAMERA_HEIGHT = 10;
-// let DRAW_MODE = gl.TRIANGLES;
-// let TARGET_X = 100;
-// let TARGET_Y = 1;
-// let TARGET_Z = 23;
-// let ASPECT_MULTIPLIER = 1;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // SET UP PROGRAM
