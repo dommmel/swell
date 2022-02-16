@@ -9,7 +9,6 @@
     "build_dev": "webpack --mode=development",
     "start": "webpack serve --mode=development"
   },
-  "author": "",
   "license": "ISC",
   "devDependencies": {
     "dat.gui": "^0.7.7",
